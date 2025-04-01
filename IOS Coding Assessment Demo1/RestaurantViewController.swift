@@ -26,10 +26,10 @@ struct RestaurantView: View {
                 
                 if viewModel.isLoading {
                     ProgressView()
-                        .frame(maxHeight: .infinity)  // Center vertically
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
                 } else if let error = viewModel.errorMessage {
                     errorView(error)
-                        .frame(maxHeight: .infinity)  // Center vertically
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
                 } else {
                     ScrollView{
                         restaurantList
@@ -44,27 +44,22 @@ struct RestaurantView: View {
         Group {
             if viewModel.isLoading {
                 ProgressView()
-                    .frame(maxHeight: .infinity)
             } else if let error = viewModel.errorMessage {
+                // Always show errors first
                 errorView(error)
-                    .frame(maxHeight: .infinity)
             } else if viewModel.restaurants.isEmpty {
+                // Only show empty state if no error exists
                 emptyStateView
-                    .frame(maxHeight: .infinity)
             } else {
-                restaurantList // This is now properly scrollable
+                restaurantList
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
     
     private var emptyStateView: some View {
         VStack {
-            Image(systemName: "fork.knife")
-                .font(.system(size: 48))
-                .foregroundColor(.gray)
-            Text("No restaurants found")
-                .font(.headline)
-                .padding(.top, 8)
+
         }
     }
     
@@ -125,17 +120,23 @@ struct RestaurantView: View {
 
     
     private func errorView(_ message: String) -> some View {
-        VStack(spacing: 0) {
+        VStack {
+            Spacer().frame(height: 50) // Adjust this value to control how high up the content appears
+            
             Image("pot")
                 .font(.largeTitle)
+            
             Text(message)
                 .multilineTextAlignment(.center)
                 .font(.system(.title3, design: .serif))
-                //.fontWeight(.semibold)
                 .padding(.bottom, 25)
+            
+            Spacer() // Pushes content upward
+            Spacer()
         }
         .foregroundColor(Color("grayblue"))
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top) // Aligns content to top
     }
 }
 
