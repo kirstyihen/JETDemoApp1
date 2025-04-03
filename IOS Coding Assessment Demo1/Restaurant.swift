@@ -17,6 +17,14 @@ struct RestaurantResponse: Codable {
         let postalCode: String?
         let area: String?
         let location: Location?
+        //let cuisineDetails: [CuisineCategory]
+        
+//        struct CuisineCategory: Codable, Identifiable {
+//            var id = UUID()
+//            let name: String
+//            let uniqueName: String
+//            let count: Int
+//        }
         
         struct Location: Codable {
             let type: String
@@ -24,6 +32,8 @@ struct RestaurantResponse: Codable {
         }
     }
 }
+
+
 
 struct Restaurant: Codable, Identifiable {
     let id: String  // Changed from UUID to String

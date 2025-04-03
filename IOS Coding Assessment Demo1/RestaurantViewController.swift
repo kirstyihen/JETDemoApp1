@@ -20,9 +20,13 @@ struct RestaurantView: View {
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
                 
+//                ScrollView(.horizontal){
+//                    //horizontal
+//                }
+                
                 searchField
                     .padding(.horizontal)
-                    //.padding(.bottom, 8)
+                    .padding(.vertical, 8)
                 
                 if viewModel.isLoading {
                     ProgressView()
@@ -57,6 +61,19 @@ struct RestaurantView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
     
+//    private var sortingPicker: some View {
+//        Picker("Sort by", selection: $viewModel.sortOption) {
+//            ForEach(RestaurantViewModel.SortOption.allCases, id: \.self) { option in
+//                Text(option.rawValue).tag(option)
+//            }
+//        }
+//        .pickerStyle(.segmented)
+//        .padding(.horizontal)
+//        .onChange(of: viewModel.sortOption) { _ in
+//            viewModel.sortRestaurants()
+//        }
+//    }
+    
     private var emptyStateView: some View {
         VStack {
 
@@ -86,13 +103,28 @@ struct RestaurantView: View {
             }
             .disabled(searchText.isEmpty)
             
-            Button{
+            Menu {
+                // Other menu items...
                 
-            }label:{
+                Menu("Filter by Rating") {
+                    ForEach(1...5, id: \.self) { rating in
+                        Button {
+                            // Filter by selected rating
+                        } label: {
+                            HStack {
+                                Text("\(rating)+")
+                                Spacer()
+                                ForEach(1...rating, id: \.self) { _ in
+                                    Image(systemName: "star.fill")
+                                }
+                            }
+                        }
+                    }
+                }
+            } label: {
                 Image(systemName: "slider.horizontal.3")
                     .foregroundColor(.orange)
                     .font(.title)
-                
             }
             .disabled(searchText.isEmpty)
         }
@@ -144,6 +176,23 @@ class RestaurantViewModel: ObservableObject {
     @Published var restaurants: [Restaurant] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var sortOption: SortOption = .rating
+    
+    enum SortOption: String, CaseIterable{
+        
+        case rating = "Rating"
+        case deliveryTime = "Delivery Time"
+    }
+    
+    func sortRestaurants(){
+        switch sortOption{
+        case .rating:
+            restaurants.sort {$0.rating.starRating > $1.rating.starRating}
+        case .deliveryTime:
+            restaurants.sort { ($0.deliveryEtaMinutes?.rangeLower ?? 0) < ($1.deliveryEtaMinutes?.rangeLower ?? 0) }
+
+        }
+    }
     
     func fetchRestaurants(postcode: String) {
         guard !postcode.isEmpty else { return }
@@ -163,7 +212,7 @@ class RestaurantViewModel: ObservableObject {
                         self?.restaurants = []
                         self?.errorMessage = "Uh-oh, no restaurants nearby :( But maybe it's time for a kitchen adventure?"
                     }else {
-                        self?.restaurants = Array(restaurants.prefix(10))
+                        self?.restaurants = Array(restaurants.prefix(20))
                         self?.errorMessage = nil
                     }
                 case .failure(let error):
