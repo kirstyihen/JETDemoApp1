@@ -22,13 +22,15 @@ struct RestaurantView: View {
                     .frame(maxWidth: .infinity)
                 
                 searchField
+                    .font(.title3)
                     .padding(.horizontal)
                     .padding(.vertical, 8)
 
                 if viewModel.isLoading {
                     Spacer()
                     ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)// Center vertically
+                        .scaleEffect(2.0)
                 } else if let error = viewModel.errorMessage {
                     errorView(error)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
@@ -39,7 +41,6 @@ struct RestaurantView: View {
                 }
             }
         }
-        
     }
     
     private var contentSection: some View {
@@ -109,9 +110,8 @@ struct RestaurantView: View {
         
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Refine Search")
+                Text("Refine Search").bold()
                     .font(.title)
-                    .fontWeight(.bold)
                 Divider()
 
                 // Sort Options
@@ -126,7 +126,7 @@ struct RestaurantView: View {
                 
                 // Filter by Rating (Stars)
                 Section {
-                    Text("Minimum Rating").bold()
+                    Text("Rating").bold()
                     HStack {
                         ForEach(1...5, id: \.self) { star in
                             Button {
@@ -142,8 +142,10 @@ struct RestaurantView: View {
                 // Filter by Delivery Time (Slider)
                 Section {
                     Text("Max Delivery Time").bold()
-                    Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
-                    Text("Up to \(Int(maxDeliveryTime)) min")
+                    VStack{
+                        Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
+                        Text("Up to \(Int(maxDeliveryTime)) min")
+                    }
                 }
                 
                 Section{
@@ -153,7 +155,7 @@ struct RestaurantView: View {
                         Button("Pizza"){}.buttonStyle(.borderedProminent)
                         Button("Pizza"){}.buttonStyle(.borderedProminent)
                         Button("Pizza"){}.buttonStyle(.borderedProminent)
-                    }
+                    }.background(Color.orange)
                 }
                 
                 // Apply Button
