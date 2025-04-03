@@ -21,15 +21,12 @@ struct RestaurantView: View {
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
                 
-//                ScrollView(.horizontal){
-//                    //horizontal
-//                }
-                
                 searchField
                     .padding(.horizontal)
                     .padding(.vertical, 8)
-                
+
                 if viewModel.isLoading {
+                    Spacer()
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
                 } else if let error = viewModel.errorMessage {
@@ -77,7 +74,6 @@ struct RestaurantView: View {
     
     private var emptyStateView: some View {
         VStack {
-
         }
     }
     
@@ -129,10 +125,8 @@ struct RestaurantView: View {
                 Text("Refine Search")
                     .font(.title)
                     .fontWeight(.bold)
-                
                 Divider()
-                Spacer()
-                
+
                 // Sort Options
                 Section {
                     Text("Sort By").bold()
@@ -163,6 +157,16 @@ struct RestaurantView: View {
                     Text("Max Delivery Time").bold()
                     Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
                     Text("Up to \(Int(maxDeliveryTime)) min")
+                }
+                
+                Section{
+                    HStack{
+                        Button("Pizza"){}.buttonStyle(.borderedProminent)
+                        Button("Pizza"){}.buttonStyle(.borderedProminent)
+                        Button("Pizza"){}.buttonStyle(.borderedProminent)
+                        Button("Pizza"){}.buttonStyle(.borderedProminent)
+                        Button("Pizza"){}.buttonStyle(.borderedProminent)
+                    }
                 }
                 
                 // Apply Button
