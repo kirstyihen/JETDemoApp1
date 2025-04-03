@@ -192,22 +192,18 @@ struct RestaurantView: View {
     
     private func errorView(_ message: String) -> some View {
         VStack {
-            Spacer().frame(height: 50) // Adjust this value to control how high up the content appears
-            
             Image("pot")
                 .font(.largeTitle)
             
             Text(message)
                 .multilineTextAlignment(.center)
-                .font(.system(.title3, design: .serif))
+                .font(.system(.title3)).bold()
                 .padding(.bottom, 25)
-            
-            Spacer() // Pushes content upward
-            Spacer()
+
         }
         .foregroundColor(Color("grayblue"))
         .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top) // Aligns content to top
+        .frame(alignment: .center)
     }
 }
 
