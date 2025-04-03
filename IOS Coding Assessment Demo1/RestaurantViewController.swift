@@ -9,6 +9,7 @@ import SwiftUI
 struct RestaurantView: View {
     @StateObject private var viewModel = RestaurantViewModel()
     @State private var searchText = ""
+    @State private var showFilterSheet = false
     @FocusState private var isSearchFieldFocused: Bool
     
     var body: some View {
@@ -103,30 +104,74 @@ struct RestaurantView: View {
             }
             .disabled(searchText.isEmpty)
             
-            Menu {
-                // Other menu items...
+            Button {
+                showFilterSheet.toggle()
+            } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.title)
+                    .foregroundColor(.orange)
+            }
+            .popover(isPresented: $showFilterSheet) {
+                FilterSortView()
+                    .padding()
+            }
+            .disabled(searchText.isEmpty)
+        }
+    }
+    
+    // Custom view for filters/sorting
+    struct FilterSortView: View {
+        @State private var minRating = 0
+        @State private var maxDeliveryTime : Double = 30
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Refine Search")
+                    .font(.title)
+                    .fontWeight(.bold)
                 
-                Menu("Filter by Rating") {
-                    ForEach(1...5, id: \.self) { rating in
-                        Button {
-                            // Filter by selected rating
-                        } label: {
-                            HStack {
-                                Text("\(rating)+")
-                                Spacer()
-                                ForEach(1...rating, id: \.self) { _ in
-                                    Image(systemName: "star.fill")
-                                }
+                Divider()
+                Spacer()
+                
+                // Sort Options
+                Section {
+                    Text("Sort By").bold()
+                    Picker("Sort By", selection: .constant(0)) {
+                        Text("Rating").tag(0)
+                        Text("Delivery Time").tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                // Filter by Rating (Stars)
+                Section {
+                    Text("Minimum Rating").bold()
+                    HStack {
+                        ForEach(1...5, id: \.self) { star in
+                            Button {
+                                minRating = star
+                            } label: {
+                                Image(systemName: star <= minRating ? "star.fill" : "star")
+                                    .foregroundColor(.orange)
                             }
                         }
                     }
                 }
-            } label: {
-                Image(systemName: "slider.horizontal.3")
-                    .foregroundColor(.orange)
-                    .font(.title)
+                
+                // Filter by Delivery Time (Slider)
+                Section {
+                    Text("Max Delivery Time").bold()
+                    Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
+                    Text("Up to \(Int(maxDeliveryTime)) min")
+                }
+                
+                // Apply Button
+                Button("Apply") {
+                    // Apply filters & sorting
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .disabled(searchText.isEmpty)
+            .frame(width: 300)
         }
     }
     
