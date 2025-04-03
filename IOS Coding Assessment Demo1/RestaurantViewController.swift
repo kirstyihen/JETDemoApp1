@@ -100,46 +100,44 @@ struct RestaurantView: View {
                     .foregroundColor(.orange)
             }
             .popover(isPresented: $showFilterSheet) {
-                FilterSortView()
+                FilterSortView(cuisineDetails: viewModel.cuisineDetails)
                     .padding()
             }
             .disabled(searchText.isEmpty)
         }
     }
     
-    // Custom view for filters/sorting
+// Custom view for filters/sorting
     struct FilterSortView: View {
+        // Receive cuisine data as a parameter
+        let cuisineDetails: [Cuisine]
         @State private var minRating = 0
-        @State private var maxDeliveryTime : Double = 30
+        @State private var maxDeliveryTime: Double = 30
         
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Refine Search")
                     .font(.title)
                     .fontWeight(.bold)
+                
                 Divider()
-                Spacer()
+                
                 // Sort Options
                 Section {
                     Menu {
                         Text("Rating")
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
                         Text("Delivery Time")
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
                     } label: {
-                        Label("Sort By", systemImage: "chevron.down") // Adds dropdown arrow
-                            .fontWeight(.bold) // Makes title bold
-                            .foregroundColor(.black) // Ensures text is black
+                        Label("Sort By", systemImage: "chevron.down")
+                            .fontWeight(.bold)
                     }
-
                 }
-                Spacer()
                 
-                // Filter by Rating (Stars)
+                // Filter by Rating
                 Section {
-                    Text("Rating").bold()
+                    Text("Minimum Rating").bold()
                     HStack {
                         ForEach(1...5, id: \.self) { star in
                             Button {
@@ -151,35 +149,43 @@ struct RestaurantView: View {
                         }
                     }
                 }
-                Spacer()
                 
-                // Filter by Delivery Time (Slider)
+                // Filter by Delivery Time
                 Section {
                     Text("Max Delivery Time").bold()
-                    VStack{
+                    VStack {
                         Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
                         Text("Up to \(Int(maxDeliveryTime)) min").font(.caption)
                     }
                 }
-                Spacer()
                 
-                Section{
-                    HStack{
-                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
-                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
-                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
-                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
-                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                // Cuisine Filters
+                Section {
+                    Text("Cuisine Types").bold()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(cuisineDetails) { cuisine in  // No need for id: when using Identifiable
+                                Button(action: {}) {
+                                    Text("\(cuisine.name) (\(cuisine.count))")
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(.orange)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(5)
+                                }
+                            }
+                        }
                     }
                 }
-                Spacer()
                 
                 // Apply Button
                 Button("Apply") {
-                    // Apply filters & sorting
+                    // Apply filters here
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.orange)
             }
+            .padding()
             .frame(width: 300)
         }
     }
@@ -223,6 +229,7 @@ struct RestaurantView: View {
 
 class RestaurantViewModel: ObservableObject {
     @Published var restaurants: [Restaurant] = []
+    @Published var cuisineDetails: [Cuisine] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var sortOption: SortOption = .rating

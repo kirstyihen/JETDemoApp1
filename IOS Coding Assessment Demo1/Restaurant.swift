@@ -7,6 +7,13 @@
 
 import Foundation
 
+struct Cuisine: Codable, Identifiable {
+    let name: String
+    let uniqueName: String
+    let count: Int
+    var id: String { uniqueName } // Use uniqueName as Identifiable ID
+}
+
 struct RestaurantResponse: Codable {
     let restaurants: [Restaurant]
     let metaData: MetaData?
@@ -17,11 +24,13 @@ struct RestaurantResponse: Codable {
         let postalCode: String?
         let area: String?
         let location: Location?
+        let cuisineDetails : [Cuisine]?
         
         struct Location: Codable {
             let type: String
             let coordinates: [Double]
         }
+       
     }
 }
 
@@ -34,14 +43,8 @@ struct Restaurant: Codable, Identifiable {
     let address: Address
     let deliveryEtaMinutes: DeliveryEtaMinutes?
     
-    // MARK: - Nested Types
-    struct Cuisine: Codable, Identifiable {
-        let name: String
-        let uniqueName: String
-        let count: Int
-        var id: String { uniqueName } // Use uniqueName as Identifiable ID
-    }
     
+ 
     struct Rating: Codable {
         let starRating: Double
         let count: Int
@@ -65,4 +68,5 @@ struct Restaurant: Codable, Identifiable {
             "\(rangeLower)-\(rangeUpper) mins"
         }
     }
+    
 }
