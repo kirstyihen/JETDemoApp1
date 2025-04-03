@@ -16,15 +16,18 @@ struct RestaurantView: View {
         NavigationStack {
             VStack(spacing: 0) {  // Remove default spacing
                 // Header image inside the NavigationStack
-                Image("headerPhoto")
+                Image("logo")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
+                    .background(Color("JETorange"))
 
                 searchField
-                    .font(.title3)
+                    .font(.title2)
                     .padding(.horizontal)
                     .padding(.vertical, 8)
+                    .scaleEffect(1.05)
+                    .cornerRadius(15)
 
                 if viewModel.isLoading {
                     Spacer()
@@ -70,7 +73,7 @@ struct RestaurantView: View {
         HStack {
             TextField("Enter UK Postcode...", text: $searchText)
                 .textFieldStyle(.roundedBorder)
-                .cornerRadius(5)
+                .cornerRadius(7)
                 .keyboardType(.default)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
@@ -111,19 +114,28 @@ struct RestaurantView: View {
         
         var body: some View {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Refine Search").bold()
+                Text("Refine Search")
                     .font(.title)
+                    .fontWeight(.bold)
                 Divider()
-
+                Spacer()
                 // Sort Options
                 Section {
-                    Text("Sort By").bold()
-                    Picker("Sort By", selection: .constant(0)) {
-                        Text("Rating").tag(0)
-                        Text("Delivery Time").tag(1)
+                    Menu {
+                        Text("Rating")
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                        Text("Delivery Time")
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                    } label: {
+                        Label("Sort By", systemImage: "chevron.down") // Adds dropdown arrow
+                            .fontWeight(.bold) // Makes title bold
+                            .foregroundColor(.black) // Ensures text is black
                     }
-                    .pickerStyle(.segmented)
+
                 }
+                Spacer()
                 
                 // Filter by Rating (Stars)
                 Section {
@@ -139,25 +151,28 @@ struct RestaurantView: View {
                         }
                     }
                 }
+                Spacer()
                 
                 // Filter by Delivery Time (Slider)
                 Section {
                     Text("Max Delivery Time").bold()
                     VStack{
                         Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
-                        Text("Up to \(Int(maxDeliveryTime)) min")
+                        Text("Up to \(Int(maxDeliveryTime)) min").font(.caption)
                     }
                 }
+                Spacer()
                 
                 Section{
                     HStack{
-                        Button("Pizza"){}.buttonStyle(.borderedProminent)
-                        Button("Pizza"){}.buttonStyle(.borderedProminent)
-                        Button("Pizza"){}.buttonStyle(.borderedProminent)
-                        Button("Pizza"){}.buttonStyle(.borderedProminent)
-                        Button("Pizza"){}.buttonStyle(.borderedProminent)
-                    }.background(Color.orange)
+                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                        Button("Pizza"){}.background(.orange).foregroundColor(.white).cornerRadius(5)
+                    }
                 }
+                Spacer()
                 
                 // Apply Button
                 Button("Apply") {
@@ -199,7 +214,6 @@ struct RestaurantView: View {
                 .multilineTextAlignment(.center)
                 .font(.system(.title3)).bold()
                 .padding(.bottom, 25)
-
         }
         .foregroundColor(Color("grayblue"))
         .padding()
