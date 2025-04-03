@@ -20,7 +20,7 @@ struct RestaurantView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                
+
                 searchField
                     .font(.title3)
                     .padding(.horizontal)
@@ -31,6 +31,7 @@ struct RestaurantView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)// Center vertically
                         .scaleEffect(2.0)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .orange))
                 } else if let error = viewModel.errorMessage {
                     errorView(error)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
