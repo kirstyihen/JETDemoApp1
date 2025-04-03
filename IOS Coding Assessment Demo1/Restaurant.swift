@@ -5,7 +5,7 @@
 //  Created by Kirsty Ihenetu on 3/28/25.
 //
 
-import SwiftUI
+import Foundation
 
 struct RestaurantResponse: Codable {
     let restaurants: [Restaurant]
@@ -17,14 +17,6 @@ struct RestaurantResponse: Codable {
         let postalCode: String?
         let area: String?
         let location: Location?
-        //let cuisineDetails: [CuisineCategory]
-        
-//        struct CuisineCategory: Codable, Identifiable {
-//            var id = UUID()
-//            let name: String
-//            let uniqueName: String
-//            let count: Int
-//        }
         
         struct Location: Codable {
             let type: String
@@ -33,10 +25,8 @@ struct RestaurantResponse: Codable {
     }
 }
 
-
-
 struct Restaurant: Codable, Identifiable {
-    let id: String  // Changed from UUID to String
+    let id: String
     let name: String
     let logoUrl: URL
     let cuisines: [Cuisine]
@@ -44,9 +34,12 @@ struct Restaurant: Codable, Identifiable {
     let address: Address
     let deliveryEtaMinutes: DeliveryEtaMinutes?
     
-    struct Cuisine: Codable {
+    // MARK: - Nested Types
+    struct Cuisine: Codable, Identifiable {
         let name: String
-        let uniqueName: String?
+        let uniqueName: String
+        let count: Int
+        var id: String { uniqueName } // Use uniqueName as Identifiable ID
     }
     
     struct Rating: Codable {
