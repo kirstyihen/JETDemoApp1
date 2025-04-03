@@ -16,7 +16,7 @@ struct RestaurantView: View {
         NavigationStack {
             VStack(spacing: 0) {  // Remove default spacing
                 // Header image inside the NavigationStack
-                Image("jet")
+                Image("headerPhoto")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
@@ -58,19 +58,6 @@ struct RestaurantView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
-    
-//    private var sortingPicker: some View {
-//        Picker("Sort by", selection: $viewModel.sortOption) {
-//            ForEach(RestaurantViewModel.SortOption.allCases, id: \.self) { option in
-//                Text(option.rawValue).tag(option)
-//            }
-//        }
-//        .pickerStyle(.segmented)
-//        .padding(.horizontal)
-//        .onChange(of: viewModel.sortOption) { _ in
-//            viewModel.sortRestaurants()
-//        }
-//    }
     
     private var emptyStateView: some View {
         VStack {
