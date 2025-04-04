@@ -14,8 +14,8 @@ struct RestaurantView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {  // Remove default spacing
-                // Header image inside the NavigationStack
+            VStack(spacing: 0) {
+                // Header image
                 Image("logo")
                     .resizable()
                     .scaledToFit()
@@ -32,40 +32,18 @@ struct RestaurantView: View {
                 if viewModel.isLoading {
                     Spacer()
                     ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)// Center vertically
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                         .scaleEffect(2.0)
                         .progressViewStyle(CircularProgressViewStyle(tint: .orange))
-                } else if let error = viewModel.errorMessage {
-                    errorView(error)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)// Center vertically
+                } else if !viewModel.errorMessage.isEmpty {
+                    errorView(viewModel.errorMessage)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 } else {
-                    ScrollView{
+                    ScrollView {
                         restaurantList
                     }
                 }
             }
-        }
-    }
-    
-    private var contentSection: some View {
-        Group {
-            if viewModel.isLoading {
-                ProgressView()
-            } else if let error = viewModel.errorMessage {
-                // Always show errors first
-                errorView(error)
-            } else if viewModel.restaurants.isEmpty {
-                // Only show empty state if no error exists
-                emptyStateView
-            } else {
-                restaurantList
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-    }
-    
-    private var emptyStateView: some View {
-        VStack {
         }
     }
     
@@ -100,156 +78,27 @@ struct RestaurantView: View {
                     .foregroundColor(.orange)
             }
             .popover(isPresented: $showFilterSheet) {
-                FilterSortView(
-                    selectedSortOption: $viewModel.sortOption,  // Now matches types
-                    cuisineDetails: viewModel.cuisineDetails
-                )
-                .padding()
+                FilterSortView(viewModel: viewModel)
+                    .padding()
             }
             .disabled(searchText.isEmpty)
         }
     }
     
-// Custom view for filters/sorting
-    struct FilterSortView: View {
-        // Receive cuisine data as a parameter
-        @Binding var selectedSortOption: RestaurantViewModel.SortOption?   // Add this binding
-        let cuisineDetails: [Cuisine]
-        @State private var minRating = 0
-        @State private var maxDeliveryTime: Double = 30
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Refine Search")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                Divider()
-                
-                // Sort Options
-                Section {
-                    Menu {
-                        Button(action: { selectedSortOption = nil }) {
-                            HStack {
-                                Text("None")
-                                if selectedSortOption == nil {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                        Button(action: {
-                            selectedSortOption = .rating
-                        }) {
-                            HStack {
-                                Text("Rating")
-                                if selectedSortOption == .rating {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                        
-                        Button(action: {
-                            selectedSortOption = .deliveryTime
-                        }) {
-                            HStack {
-                                Text("Delivery Time")
-                                if selectedSortOption == .deliveryTime {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    } label: {
-                        Label(
-                            title: {
-                                Text(selectedSortOption?.rawValue ?? "Sort By")
-                            },
-                            icon: {
-                                Image(systemName: selectedSortOption?.systemImage ?? "arrow.up.arrow.down")
-                            }
-                        )
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
-                    }
-                }
-                
-                // Filter by Rating
-                Section {
-                    Text("Rating").bold()
-                    HStack {
-                        ForEach(1...5, id: \.self) { star in
-                            Button {
-                                minRating = star
-                            } label: {
-                                Image(systemName: star <= minRating ? "star.fill" : "star")
-                                    .foregroundColor(.orange)
-                            }
-                        }
-                    }
-                }
-                
-                // Filter by Delivery Time
-                Section {
-                    HStack{
-                        Text("Delivery Time").bold()
-                        Image(systemName: "clock.fill")
-                    }
-                    VStack {
-                        Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
-                        Text("Up to \(Int(maxDeliveryTime)) min").font(.caption)
-                    }
-                }
-                
-                // Cuisine Filters
-                Section {
-                    Text("Cuisine Types").bold()
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(cuisineDetails) { cuisine in  // No need for id: when using Identifiable
-                                Button(action: {}) {
-                                    Text("\(cuisine.name) (\(cuisine.count ?? 0))")
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(.orange)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(5)
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Apply Button
-                Button("Apply") {
-                    // Apply filters here
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.orange)
-            }
-            .padding()
-            .frame(width: 300)
-        }
-    }
-    
-    private func searchRestaurants() {
-        isSearchFieldFocused = false
-        viewModel.fetchRestaurants(postcode: searchText)
-    }
-    
     private var restaurantList: some View {
         ScrollView {
-            LazyVStack(spacing: 12) {  // Added spacing between items
-                ForEach(viewModel.restaurants) { restaurant in
+            LazyVStack(spacing: 12) {
+                ForEach(viewModel.displayedRestaurants) { restaurant in
                     RestaurantRow(restaurant: restaurant)
                         .padding(.horizontal, 16)
                 }
             }
-            .padding(.vertical, 8)  // Add vertical padding
+            .padding(.vertical, 8)
         }
         .refreshable {
             searchRestaurants()
         }
     }
-
     
     private func errorView(_ message: String) -> some View {
         VStack {
@@ -265,69 +114,216 @@ struct RestaurantView: View {
         .padding()
         .frame(alignment: .center)
     }
+    
+    private func searchRestaurants() {
+        isSearchFieldFocused = false
+        viewModel.fetchRestaurants(postcode: searchText)
+    }
+}
+
+struct FilterSortView: View {
+    @Environment(\.dismiss) var dismiss
+    @ObservedObject var viewModel: RestaurantViewModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Refine Search")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                
+                Spacer()
+                
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            Divider()
+            
+            Section {
+                Text("Sort By").bold()
+                Picker("", selection: $viewModel.sortOption) {
+                    ForEach(RestaurantViewModel.SortOption.allCases, id: \.self) { option in
+                        Text(option.rawValue).tag(option)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            
+            Section {
+                Text("Minimum Rating: \(viewModel.minRating)+").bold()
+                HStack {
+                    ForEach(1...5, id: \.self) { star in
+                        Button {
+                            viewModel.minRating = star
+                        } label: {
+                            Image(systemName: star <= viewModel.minRating ? "star.fill" : "star")
+                                .foregroundColor(.orange)
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            
+            Section {
+                Text("Max Delivery Time: \(viewModel.maxDeliveryTime) min").bold()
+                Slider(
+                    value: Binding(
+                        get: { Double(viewModel.maxDeliveryTime) },
+                        set: { viewModel.maxDeliveryTime = Int($0) }
+                    ),
+                    in: 5...60,
+                    step: 5
+                )
+            }
+            
+            if !viewModel.cuisineDetails.isEmpty {
+                Section {
+                    Text("Cuisine Types").bold()
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(viewModel.cuisineDetails) { cuisine in
+                                Button {
+                                    if viewModel.selectedCuisines.contains(cuisine.uniqueName) {
+                                        viewModel.selectedCuisines.remove(cuisine.uniqueName)
+                                    } else {
+                                        viewModel.selectedCuisines.insert(cuisine.uniqueName)
+                                    }
+                                } label: {
+                                    Text("\(cuisine.name) (\(cuisine.count))")
+                                        .font(.caption)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            viewModel.selectedCuisines.contains(cuisine.uniqueName) ?
+                                            Color.orange : Color.gray.opacity(0.2)
+                                        )
+                                        .foregroundColor(
+                                            viewModel.selectedCuisines.contains(cuisine.uniqueName) ?
+                                            .white : .primary
+                                        )
+                                        .cornerRadius(15)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            HStack {
+                Button("Reset All") {
+                    viewModel.sortOption = .none
+                    viewModel.minRating = 0
+                    viewModel.maxDeliveryTime = 60
+                    viewModel.selectedCuisines = []
+                }
+                .buttonStyle(.bordered)
+                .tint(.gray)
+                
+                Button("Done") {
+                    dismiss()
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.orange)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding()
+        .frame(width: 300, height: 500)
+    }
 }
 
 class RestaurantViewModel: ObservableObject {
-    @Published var restaurants: [Restaurant] = []
+    @Published var allRestaurants: [Restaurant] = []
+    @Published var displayedRestaurants: [Restaurant] = []
     @Published var cuisineDetails: [Cuisine] = []
     @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var sortOption: SortOption? = nil
+    @Published var errorMessage = ""
     
-    enum SortOption: String, CaseIterable{
-        case none = "None"
-        case rating = "Rating"
-        case deliveryTime = "Delivery Time"
-        
-        var systemImage: String{
-            switch self{
-            case .none: return "arrow.up.arrow.down"
-            case .rating: return "star.fill"
-            case .deliveryTime: return "clock"
-                
-            }
-        }
+    @Published var sortOption: SortOption = .none {
+        didSet { applyFilters() }
+    }
+    @Published var minRating: Int = 0 {
+        didSet { applyFilters() }
+    }
+    @Published var maxDeliveryTime: Int = 60 {
+        didSet { applyFilters() }
+    }
+    @Published var selectedCuisines: Set<String> = [] {
+        didSet { applyFilters() }
     }
     
-    func sortRestaurants(){
-        guard let option = sortOption else{
-            return
+    enum SortOption: String, CaseIterable {
+        case none = "Default"
+        case rating = "Rating"
+        case deliveryTime = "Delivery Time"
+    }
+    
+    func applyFilters() {
+        var results = allRestaurants
+        
+        results = results.filter { $0.rating.starRating >= Double(minRating) }
+        results = results.filter { ($0.deliveryEtaMinutes?.rangeUpper ?? Int.max) <= maxDeliveryTime }
+        
+        if !selectedCuisines.isEmpty {
+            results = results.filter { restaurant in
+                restaurant.cuisines.contains { cuisine in
+                    selectedCuisines.contains(cuisine.uniqueName)
+                }
+            }
         }
-        switch option {
+        
+        switch sortOption {
         case .rating:
-            restaurants.sort { $0.rating.starRating > $1.rating.starRating }
+            results.sort { $0.rating.starRating > $1.rating.starRating }
         case .deliveryTime:
-            restaurants.sort { ($0.deliveryEtaMinutes?.rangeLower ?? 0) < ($1.deliveryEtaMinutes?.rangeLower ?? 0) }
+            results.sort { ($0.deliveryEtaMinutes?.rangeLower ?? 0) < ($1.deliveryEtaMinutes?.rangeLower ?? 0) }
         case .none:
-            break // No sorting
+            break
         }
+        
+        displayedRestaurants = results
     }
     
     func fetchRestaurants(postcode: String) {
-        guard !postcode.isEmpty else { return }
+        guard !postcode.isEmpty else {
+            allRestaurants = []
+            displayedRestaurants = []
+            errorMessage = "Please enter a valid postcode"
+            isLoading = false
+            return
+        }
         
         isLoading = true
-        errorMessage = nil
-        
+        errorMessage = ""
         let cleanedPostcode = postcode.replacingOccurrences(of: " ", with: "")
         
         NetworkManager.shared.fetchRestaurants(postcode: cleanedPostcode) { [weak self] result in
             DispatchQueue.main.async {
-                self?.isLoading = false
+                guard let self = self else { return }
+                
+                self.isLoading = false
                 
                 switch result {
-                case .success(let restaurants):
-                    if restaurants.isEmpty {
-                        self?.restaurants = []
-                        self?.errorMessage = "Uh-oh, no restaurants nearby :( But maybe it's time for a kitchen adventure?"
-                    }else {
-                        self?.restaurants = Array(restaurants.prefix(20))
-                        self?.errorMessage = nil
+                case .success(let response):
+                    self.allRestaurants = response.restaurants
+                    self.cuisineDetails = response.metaData?.cuisineDetails ?? []
+                    self.applyFilters()
+                    
+                    if self.displayedRestaurants.isEmpty {
+                        self.errorMessage = "No restaurants match your current filters"
                     }
                 case .failure(let error):
-                    self?.errorMessage = self?.errorMessage(for: error)
-                    self?.restaurants = []
-                    
+                    self.allRestaurants = []
+                    self.displayedRestaurants = []
+                    self.errorMessage = self.errorMessage(for: error)
                 }
             }
         }
