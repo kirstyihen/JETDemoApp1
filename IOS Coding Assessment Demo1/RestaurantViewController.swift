@@ -129,8 +129,9 @@ struct FilterSortView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("Refine Search")
-                    .font(.title2)
+                    .font(.title)
                     .fontWeight(.bold)
+                Image(systemName: "magnifyingglass")
                 
                 Spacer()
                 
@@ -154,7 +155,7 @@ struct FilterSortView: View {
             }
             
             Section {
-                Text("Minimum Rating: \(viewModel.minRating)+").bold()
+                Text("Rating: \(viewModel.minRating)+").bold()
                 HStack {
                     ForEach(1...5, id: \.self) { star in
                         Button {
@@ -170,20 +171,26 @@ struct FilterSortView: View {
             }
             
             Section {
-                Text("Max Delivery Time: \(viewModel.maxDeliveryTime) min").bold()
+                HStack{
+                    Text("Delivery Time: \(viewModel.maxDeliveryTime) min").bold()
+                    Image(systemName: "car")
+                }
                 Slider(
                     value: Binding(
                         get: { Double(viewModel.maxDeliveryTime) },
                         set: { viewModel.maxDeliveryTime = Int($0) }
                     ),
-                    in: 5...60,
+                    in: 5...45,
                     step: 5
                 )
             }
             
             if !viewModel.cuisineDetails.isEmpty {
                 Section {
-                    Text("Cuisine Types").bold()
+                    HStack{
+                        Text("Cuisines and Offers").bold()
+                        Image(systemName: "fork.knife")
+                    }
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(viewModel.cuisineDetails) { cuisine in
@@ -221,7 +228,7 @@ struct FilterSortView: View {
                 Button("Reset All") {
                     viewModel.sortOption = .none
                     viewModel.minRating = 0
-                    viewModel.maxDeliveryTime = 60
+                    viewModel.maxDeliveryTime = 5
                     viewModel.selectedCuisines = []
                 }
                 .buttonStyle(.bordered)
