@@ -194,7 +194,7 @@ struct FilterSortView: View {
                                         viewModel.selectedCuisines.insert(cuisine.uniqueName)
                                     }
                                 } label: {
-                                    Text("\(cuisine.name) (\(cuisine.count))")
+                                    Text("\(cuisine.name) (\(cuisine.count ?? 0))")
                                         .font(.caption)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
@@ -320,6 +320,7 @@ class RestaurantViewModel: ObservableObject {
                     if self.displayedRestaurants.isEmpty {
                         self.errorMessage = "No restaurants match your current filters"
                     }
+                    
                 case .failure(let error):
                     self.allRestaurants = []
                     self.displayedRestaurants = []
