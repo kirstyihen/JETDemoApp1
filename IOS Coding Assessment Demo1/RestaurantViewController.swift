@@ -166,7 +166,7 @@ struct RestaurantView: View {
                         HStack(spacing: 8) {
                             ForEach(cuisineDetails) { cuisine in  // No need for id: when using Identifiable
                                 Button(action: {}) {
-                                    Text("\(cuisine.name) (\(cuisine.count))")
+                                    Text("\(cuisine.name) (\(cuisine.count ?? 0))")
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
                                         .background(.orange)

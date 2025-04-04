@@ -10,7 +10,7 @@ import Foundation
 struct Cuisine: Codable, Identifiable {
     let name: String
     let uniqueName: String
-    let count: Int
+    let count: Int?
     var id: String { uniqueName } // Use uniqueName as Identifiable ID
 }
 
