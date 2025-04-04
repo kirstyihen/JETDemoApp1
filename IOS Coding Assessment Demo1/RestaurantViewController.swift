@@ -100,7 +100,10 @@ struct RestaurantView: View {
                     .foregroundColor(.orange)
             }
             .popover(isPresented: $showFilterSheet) {
-                FilterSortView(cuisineDetails: viewModel.cuisineDetails)
+                FilterSortView(
+                    selectedSortOption: $viewModel.sortOption,  // Pass the binding
+                    cuisineDetails: viewModel.cuisineDetails
+                )
                     .padding()
             }
             .disabled(searchText.isEmpty)
@@ -110,6 +113,7 @@ struct RestaurantView: View {
 // Custom view for filters/sorting
     struct FilterSortView: View {
         // Receive cuisine data as a parameter
+        @Binding var selectedSortOption: RestaurantViewModel.SortOption  // Add this binding
         let cuisineDetails: [Cuisine]
         @State private var minRating = 0
         @State private var maxDeliveryTime: Double = 30
@@ -125,19 +129,40 @@ struct RestaurantView: View {
                 // Sort Options
                 Section {
                     Menu {
-                        Text("Rating")
-                            .fontWeight(.bold)
-                        Text("Delivery Time")
-                            .fontWeight(.bold)
+                        Button(action: {
+                            selectedSortOption = .rating
+                        }) {
+                            HStack {
+                                Text("Rating")
+                                if selectedSortOption == .rating {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                        
+                        Button(action: {
+                            selectedSortOption = .deliveryTime
+                        }) {
+                            HStack {
+                                Text("Delivery Time")
+                                if selectedSortOption == .deliveryTime {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
                     } label: {
-                        Label("Sort By", systemImage: "chevron.down")
-                            .fontWeight(.bold)
+                        Label(
+                            title: { Text("Sort By: \(selectedSortOption.rawValue)") },
+                            icon: { Image(systemName: "chevron.down") }
+                        )
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
                     }
                 }
                 
                 // Filter by Rating
                 Section {
-                    Text("Minimum Rating").bold()
+                    Text("Rating").bold()
                     HStack {
                         ForEach(1...5, id: \.self) { star in
                             Button {
@@ -152,7 +177,10 @@ struct RestaurantView: View {
                 
                 // Filter by Delivery Time
                 Section {
-                    Text("Max Delivery Time").bold()
+                    HStack{
+                        Text("Delivery Time").bold()
+                        Image(systemName: "car.fill")
+                    }
                     VStack {
                         Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
                         Text("Up to \(Int(maxDeliveryTime)) min").font(.caption)
