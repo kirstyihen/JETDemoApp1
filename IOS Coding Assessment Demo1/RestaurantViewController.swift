@@ -101,10 +101,10 @@ struct RestaurantView: View {
             }
             .popover(isPresented: $showFilterSheet) {
                 FilterSortView(
-                    selectedSortOption: $viewModel.sortOption,  // Pass the binding
+                    selectedSortOption: $viewModel.sortOption,  // Now matches types
                     cuisineDetails: viewModel.cuisineDetails
                 )
-                    .padding()
+                .padding()
             }
             .disabled(searchText.isEmpty)
         }
@@ -113,7 +113,7 @@ struct RestaurantView: View {
 // Custom view for filters/sorting
     struct FilterSortView: View {
         // Receive cuisine data as a parameter
-        @Binding var selectedSortOption: RestaurantViewModel.SortOption  // Add this binding
+        @Binding var selectedSortOption: RestaurantViewModel.SortOption?   // Add this binding
         let cuisineDetails: [Cuisine]
         @State private var minRating = 0
         @State private var maxDeliveryTime: Double = 30
@@ -129,6 +129,14 @@ struct RestaurantView: View {
                 // Sort Options
                 Section {
                     Menu {
+                        Button(action: { selectedSortOption = nil }) {
+                            HStack {
+                                Text("None")
+                                if selectedSortOption == nil {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
                         Button(action: {
                             selectedSortOption = .rating
                         }) {
@@ -152,8 +160,12 @@ struct RestaurantView: View {
                         }
                     } label: {
                         Label(
-                            title: { Text("Sort By: \(selectedSortOption.rawValue)") },
-                            icon: { Image(systemName: "chevron.down") }
+                            title: {
+                                Text(selectedSortOption?.rawValue ?? "Sort By")
+                            },
+                            icon: {
+                                Image(systemName: selectedSortOption?.systemImage ?? "arrow.up.arrow.down")
+                            }
                         )
                         .fontWeight(.bold)
                         .foregroundColor(.black)
@@ -179,7 +191,7 @@ struct RestaurantView: View {
                 Section {
                     HStack{
                         Text("Delivery Time").bold()
-                        Image(systemName: "car.fill")
+                        Image(systemName: "clock.fill")
                     }
                     VStack {
                         Slider(value: $maxDeliveryTime, in: 5...30, step: 5)
@@ -260,21 +272,34 @@ class RestaurantViewModel: ObservableObject {
     @Published var cuisineDetails: [Cuisine] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var sortOption: SortOption = .rating
+    @Published var sortOption: SortOption? = nil
     
     enum SortOption: String, CaseIterable{
-        
+        case none = "None"
         case rating = "Rating"
         case deliveryTime = "Delivery Time"
+        
+        var systemImage: String{
+            switch self{
+            case .none: return "arrow.up.arrow.down"
+            case .rating: return "star.fill"
+            case .deliveryTime: return "clock"
+                
+            }
+        }
     }
     
     func sortRestaurants(){
-        switch sortOption{
+        guard let option = sortOption else{
+            return
+        }
+        switch option {
         case .rating:
-            restaurants.sort {$0.rating.starRating > $1.rating.starRating}
+            restaurants.sort { $0.rating.starRating > $1.rating.starRating }
         case .deliveryTime:
             restaurants.sort { ($0.deliveryEtaMinutes?.rangeLower ?? 0) < ($1.deliveryEtaMinutes?.rangeLower ?? 0) }
-
+        case .none:
+            break // No sorting
         }
     }
     
