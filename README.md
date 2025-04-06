@@ -11,7 +11,7 @@ A SwiftUI application for browsing restaurants by postcode with filtering capabi
   - Sort by Default, Rating, or Delivery Time
   - Minimum star rating (1-5)  
   - Delivery time range (5-60 mins)  
-  - Cuisine type and Restaurant Offerings 
+  - Cuisine type and Restaurant Deals 
 
 ## How to Run  
 ### Xcode Setup  
@@ -38,10 +38,12 @@ If scrolling isn't working in simulator:
 - Rating displays raw `starRating` without rounding  
 
 ### Improvements Planned  
-- [ ] Add loading skeletons during API calls  
-- [ ] Implement cuisine search within filter panel  
-- [ ] Cache API responses for offline support  
+- [ ] Including more Restaurant information (pricing, menu, accessibility, etc.)
+- [ ] Loading Skeleton whilst waiting for API to fetch the data 
+- [ ] Implement cuisine search within filter panel
 - [ ] Add map view for address visualization  
+- [ ] Other Design Changes(microinteractions, selection haptics, empty view, dark model support, etc.)
+
 
 ## Assessment Criteria Verification  
 | Requirement        | Implementation |  
