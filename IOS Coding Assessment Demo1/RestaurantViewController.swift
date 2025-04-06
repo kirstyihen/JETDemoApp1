@@ -122,6 +122,7 @@ struct RestaurantView: View {
 }
 
 struct FilterSortView: View {
+    @State private var showCuisineInfo = false
     @Environment(\.dismiss) var dismiss
     @ObservedObject var viewModel: RestaurantViewModel
     
@@ -187,13 +188,44 @@ struct FilterSortView: View {
             
             if !viewModel.cuisineDetails.isEmpty {
                 Section {
-                    HStack{
-                        Text("Cuisines and Offers").bold()
+                    HStack {
+                        Text("Cuisine & Deals").bold()
                         Image(systemName: "fork.knife")
+                        
+                        // Info button with popup message
+                        Button(action: {
+                            // This will trigger the alert
+                            showCuisineInfo.toggle()
+                        }) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 14)) // Makes it smaller
+                                .foregroundColor(.gray)
+                        }
+                        .buttonStyle(.plain)
+                        .alert("🍽️ Cuisine & Deals Guide", isPresented: $showCuisineInfo) {
+                            Button("Got it!", role: .cancel) { }
+                        } message: {
+                            Text("Discover your perfect meal! Tap cuisine types to find restaurants that match your cravings. The numbers show how many options are available. Mix and match filters to find delicious food at great prices!")
+                        }
                     }
+                
+                    
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            ForEach(viewModel.cuisineDetails) { cuisine in
+                            // Sort cuisineDetails so selected items appear first
+                            ForEach(viewModel.cuisineDetails.sorted { cuisine1, cuisine2 in
+                                let isSelected1 = viewModel.selectedCuisines.contains(cuisine1.uniqueName)
+                                let isSelected2 = viewModel.selectedCuisines.contains(cuisine2.uniqueName)
+                                
+                                // Selected items come before unselected
+                                if isSelected1 && !isSelected2 {
+                                    return true
+                                } else if !isSelected1 && isSelected2 {
+                                    return false
+                                }
+                                // Maintain original order for items with same selection state
+                                return false
+                            }) { cuisine in
                                 Button {
                                     if viewModel.selectedCuisines.contains(cuisine.uniqueName) {
                                         viewModel.selectedCuisines.remove(cuisine.uniqueName)
@@ -228,7 +260,7 @@ struct FilterSortView: View {
                 Button("Reset All") {
                     viewModel.sortOption = .none
                     viewModel.minRating = 0
-                    viewModel.maxDeliveryTime = 5
+                    viewModel.maxDeliveryTime = 45
                     viewModel.selectedCuisines = []
                 }
                 .buttonStyle(.bordered)
@@ -260,7 +292,7 @@ class RestaurantViewModel: ObservableObject {
     @Published var minRating: Int = 0 {
         didSet { applyFilters() }
     }
-    @Published var maxDeliveryTime: Int = 60 {
+    @Published var maxDeliveryTime: Int = 45 {
         didSet { applyFilters() }
     }
     @Published var selectedCuisines: Set<String> = [] {
