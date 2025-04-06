@@ -334,7 +334,7 @@ class RestaurantViewModel: ObservableObject {
         displayedRestaurants = results
         
         if results.isEmpty {
-            errorMessage = "Sorry! No restaurants nearby :'("
+            errorMessage = "Uh-oh! No restaurants nearby... but maybe it's a sign to try a homemade treat!"
         } else {
             errorMessage = ""
         }
@@ -366,7 +366,7 @@ class RestaurantViewModel: ObservableObject {
                     self.applyFilters()
                     
                     if self.displayedRestaurants.isEmpty {
-                        self.errorMessage = "Sorry! No restaurants nearby :'("
+                        self.errorMessage = "Uh-oh! No restaurants nearby... but maybe it's a sign to try a homemade treat!"
                     }
                     
                 case .failure(let error):
@@ -389,6 +389,6 @@ class RestaurantViewModel: ObservableObject {
                 return "Network error occurred"
             }
         }
-        return "Sorry! No restaurants nearby :'("
+        return "Uh-oh! No restaurants nearby... but maybe it's a sign to try a homemade treat!"
     }
 }
