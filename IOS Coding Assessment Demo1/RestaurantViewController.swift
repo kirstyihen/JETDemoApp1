@@ -308,6 +308,7 @@ class RestaurantViewModel: ObservableObject {
     func applyFilters() {
         var results = allRestaurants
         
+        // Apply filters
         results = results.filter { $0.rating.starRating >= Double(minRating) }
         results = results.filter { ($0.deliveryEtaMinutes?.rangeUpper ?? Int.max) <= maxDeliveryTime }
         
@@ -319,6 +320,7 @@ class RestaurantViewModel: ObservableObject {
             }
         }
         
+        // Apply sorting
         switch sortOption {
         case .rating:
             results.sort { $0.rating.starRating > $1.rating.starRating }
@@ -328,7 +330,14 @@ class RestaurantViewModel: ObservableObject {
             break
         }
         
+        // Update displayed restaurants and error message
         displayedRestaurants = results
+        
+        if results.isEmpty {
+            errorMessage = "Sorry! No restaurants nearby :'("
+        } else {
+            errorMessage = ""
+        }
     }
     
     func fetchRestaurants(postcode: String) {
@@ -352,12 +361,12 @@ class RestaurantViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let response):
-                    self.allRestaurants = response.restaurants
+                    self.allRestaurants = Array(response.restaurants.prefix(10))
                     self.cuisineDetails = response.metaData?.cuisineDetails ?? []
                     self.applyFilters()
                     
                     if self.displayedRestaurants.isEmpty {
-                        self.errorMessage = "No restaurants match your current filters"
+                        self.errorMessage = "Sorry! No restaurants nearby :'("
                     }
                     
                 case .failure(let error):
@@ -380,6 +389,6 @@ class RestaurantViewModel: ObservableObject {
                 return "Network error occurred"
             }
         }
-        return "Failed to load restaurants"
+        return "Sorry! No restaurants nearby :'("
     }
 }
